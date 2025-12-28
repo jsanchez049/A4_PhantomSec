@@ -1,0 +1,54 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Preparación y Tests
+      - name: Descargar código
+        uses: actions/checkout@v3
+
+      - name: Configurar Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          
+      - name: Ejecutar Tests Unitarios
+        run: go test -v ./...
+      
+      # 2. Análisis de Seguridad (SAST)
+      - name: Escáner de Seguridad Gosec
+        uses: securego/gosec@master
+        with:
+          args: ./...
+
+      # 3. Compilación
+      - name: Build para Linux
+        run: GOOS=linux GOARCH=amd64 go build -o phantom-app main.go
+      
+      # 4. Despliegue (Este paso fallará hasta que pongas los Secrets)
+      - name: Copiar archivos al servidor
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          source: "phantom-app,static/*"
+          target: "/home/grup1/app"
+
+      - name: Reiniciar Servicio
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            chmod +x /home/grup1/app/phantom-app
+            # Usamos sudo porque el servicio es del sistema
+            sudo systemctl restart phantomsec.service
