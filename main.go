@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
+	"time" 
 )
 
 func main() {
-
+	
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
@@ -29,10 +29,10 @@ func main() {
 	port := "8080"
 	log.Printf("Servidor arrancando en http://localhost:%s", port)
 
-
+	
 	server := &http.Server{
 		Addr:              ":" + port,
-		ReadHeaderTimeout: 3 * time.Second,
+		ReadHeaderTimeout: 3 * time.Second, // <--- ...y la USAMOS aquí. Si falta esto, falla.
 	}
 
 	if err := server.ListenAndServe(); err != nil {
