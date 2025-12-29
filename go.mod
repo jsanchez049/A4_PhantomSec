@@ -1,4 +1,4 @@
-Go
+go
 
 module phantomsec-app
 
