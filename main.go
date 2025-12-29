@@ -1,20 +1,19 @@
 package main
-//módulos necesarios a importar que usara nuestra app
+
 import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 )
 
 func main() {
-	// 1. Decirle al servidor dónde están los archivos estáticos (la imagen)
-	// Esto sirve la carpeta ./static en la url /static/
+
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	// 2. La ruta principal (Home)
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// Escribimos HTML simple directamente en la respuesta
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		fmt.Fprintf(w, `
 			<div style="text-align: center; margin-top: 50px;">
@@ -26,10 +25,17 @@ func main() {
 		`)
 	})
 
-	// 3. Iniciar el servidor
+	
 	port := "8080"
 	log.Printf("Servidor arrancando en http://localhost:%s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+
+
+	server := &http.Server{
+		Addr:              ":" + port,
+		ReadHeaderTimeout: 3 * time.Second,
+	}
+
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }
