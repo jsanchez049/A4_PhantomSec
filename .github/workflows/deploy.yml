@@ -28,7 +28,7 @@ jobs:
 
       # 3. Compilación
       - name: Build para Linux
-        run: GOOS=linux GOARCH=amd64 go build -o phantom-app main.go
+        run: GOOS=linux GOARCH=arm64 go build -o phantom-app main.go
       
       # 4. Despliegue (Este paso fallará hasta que pongas los Secrets)
       - name: Copiar archivos al servidor
